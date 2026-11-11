@@ -1,0 +1,8 @@
+production:
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch("REDMINE_DATABASE_HOST", "db") %>
+  database: <%= ENV.fetch("REDMINE_DATABASE_NAME", "redmine") %>
+  username: <%= ENV.fetch("REDMINE_DATABASE_USERNAME", "redmine") %>
+  password: <%= ENV["REDMINE_DATABASE_PASSWORD"] %>
+  pool: 5
