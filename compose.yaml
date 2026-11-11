@@ -1,0 +1,39 @@
+services:
+  redmine:
+    build: .
+    ports:
+      - "3000:3000"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+    environment:
+      REDMINE_DATABASE_HOST: db
+      REDMINE_DATABASE_NAME: redmine
+      REDMINE_DATABASE_USERNAME: redmine
+      REDMINE_DATABASE_PASSWORD: ${REDMINE_DATABASE_PASSWORD:?Set a run-owned PostgreSQL password}
+      SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE:?Set a run-owned Rails session secret}
+    volumes:
+      - redmine_data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: redmine
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: ${REDMINE_DATABASE_PASSWORD:?Set a run-owned PostgreSQL password}
+    volumes:
+      - redmine_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redmine -d redmine"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+volumes:
+  redmine_data:
+  redmine_postgres:
